@@ -1,3 +1,5 @@
+
+# %%
 from bs4 import BeautifulSoup
 import sys
 import wget
@@ -5,7 +7,7 @@ import os
 import urllib.request
 import re
 import subprocess
-
+# %%
 url = str(input("Enter the url: "))
 howmanypages = int(input("How many pages? "))
 
@@ -20,19 +22,23 @@ for page in range(1, howmanypages + 1):
     imglink3 = soup.find('meta', attrs={'property': 'og:image'})['content']
     imglink2 = imglink3.replace('1.jpg','')
     imglink = imglink2 + str(page) + ".jpg"
+    imglink_name = imglink2 + str(page).zfill(3) + ".jpg"
 
     # download image asset
     wget.download(imglink)
     print('\nPage {}: {}\n'.format(page, imglink))
 
     with  open('urls.txt', 'a') as f:
-        f.write(imglink + '\n')
+        f.write(imglink_name + '\n')
 
-
+# %%
 # convert pages to pdf
-params = ['convert', 'page_*', pagetitle + '.pdf']
-subprocess.run(params)
+# https://stackoverflow.com/questions/28995260
 
+pipeline =  r'convert $(ls *.jpg | sort -V) "{}.pdf"'.format(re.sub(r'\W+', ' ',pagetitle))
+subprocess.check_call(pipeline, shell=True)
+
+# %%
 # collect information on the file
 metadata = {}
 metadata['URL'] = url
